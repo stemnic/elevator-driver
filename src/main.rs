@@ -16,20 +16,39 @@ fn main() {
     //println!("Button sig: {:?}", driver.get_button_signal(elev_driver::Button::CallDown(Floor::At(3))).unwrap());
     //println!("stop sig: {:?}", driver.get_stop_signal().unwrap());
 
-    driver.set_motor_dir(MotorDir::Up)
-           .expect("Set MotorDir failed");
+    //driver.set_motor_dir(MotorDir::Up).expect("Set MotorDir failed");
 
     const SEC_TOP: u8 = elev_driver::N_FLOORS - 1;
     loop {
         
-        
-        match driver.get_floor_signal()
-                     .expect("Get FloorSignal failed") {
-            Floor::At(SEC_TOP) => driver.set_motor_dir(MotorDir::Down)
-                                         .expect("Set MotorDir failed"),
-            Floor::At(0) => driver.set_motor_dir(MotorDir::Up)
-                                   .expect("Set MotorDir Failed"),
-            _ => {}
+        for floor in 0..elev_driver::N_FLOORS {
+            match driver.get_button_signal(elev_driver::Button::Internal(elev_driver::Floor::At(floor))).expect("Button signal error") {
+                Signal::High => {
+                    loop {
+                        match driver.get_floor_signal()
+                                    .expect("Get FloorSignal failed") {
+                            Floor::At(data) => {
+                                if data > floor{
+                                    driver.set_motor_dir(MotorDir::Down).expect("Set MotorDir failed");
+                                }
+                                if data < floor{
+                                    driver.set_motor_dir(MotorDir::Up).expect("Set MotorDir failed");
+                                }
+                                if data == floor{
+                                    driver.set_motor_dir(MotorDir::Stop).expect("Set MotorDir failed");
+                                    break;
+                                }
+                            }
+                            Floor::Between => {
+
+                            }
+                        }
+                    }
+                }
+                Signal::Low => {
+
+                }
+            }
         }
         
         if let Signal::High = driver.get_stop_signal().expect("Get StopSignal failed") {
