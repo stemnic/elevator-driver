@@ -21,7 +21,7 @@ fn main() {
 
     const SEC_TOP: u8 = elev_driver::N_FLOORS - 1;
     loop {
-        thread::sleep(time::Duration::from_millis(50));
+        
         
         match driver.get_floor_signal()
                      .expect("Get FloorSignal failed") {
@@ -31,14 +31,13 @@ fn main() {
                                    .expect("Set MotorDir Failed"),
             _ => {}
         }
-        thread::sleep(time::Duration::from_millis(50));
-
-        if let Signal::High = driver.get_stop_signal()
-                                    .expect("Get StopSignal failed") {
-                                    driver.set_motor_dir(MotorDir::Stop)
-                   .expect("Set MotorDir failed");
+        
+        if let Signal::High = driver.get_stop_signal().expect("Get StopSignal failed") {
+            driver.set_motor_dir(MotorDir::Stop)
+                .expect("Set MotorDir failed");
             return;
         }
+        
     }
 
     driver.io.lifeline.join();

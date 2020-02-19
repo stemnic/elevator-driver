@@ -3,7 +3,7 @@ use std::net::TcpStream;
 use std::io::{Write, Read};
 use std::sync::mpsc::{Receiver, Sender};
 use std::time::Duration;
-use std::thread;
+use std::{thread, time};
 
 pub struct Communication {
     data_to_recive: Sender<std::vec::Vec<u8>>,
@@ -20,6 +20,7 @@ impl Communication {
             loop {
                 match send_message.recv() {
                     Ok(data) => {
+                        thread::sleep(time::Duration::from_millis(20));
                         println!("[elev_driver] Sending: {:?}", data);
                         let mut buffer = [0; 4];
                         let _ = stream.write(&data.into_boxed_slice()); //We always expect a response by polling the elevator server
