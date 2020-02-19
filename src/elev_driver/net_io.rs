@@ -20,7 +20,7 @@ impl Communication {
             loop {
                 match send_message.recv() {
                     Ok(data) => {
-                        println!("Sending to elevator: {:?}", data);
+                        println!("[elev_driver] Sending: {:?}", data);
                         let mut buffer = [0; 4];
                         let _ = stream.write(&data.into_boxed_slice()); //We always expect a response by polling the elevator server
                         let _ = match stream.read(&mut buffer) {
@@ -33,7 +33,10 @@ impl Communication {
                         };
                         let mut t = Vec::new();
                         for i in buffer.iter() { t.push(*i); }
-                        let _ = copy_reciver.send(t);
+                        if t != vec![0,0,0,0]{
+                            let _ = copy_reciver.send(t);
+                        }
+                        
                     }
         
                     Err(_) => return, // This means, that the sender has disconnected
