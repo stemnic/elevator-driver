@@ -79,18 +79,18 @@ impl ElevIo {
                     Ok(channel_sender) => {
                         let data = match from_elev_reciver.recv() {
                             Ok(value) => {
-                                println!("[elev_driver] Answer:  {:?}", value);
+                                //println!("[elev_driver] Answer:  {:?}", value);
                                 value
                             },
                             Err(_) => {
-                                println!("Recv Error");
+                                println!("[elev_driver] Recv Error");
                                 vec![0,0,0,0]
                             }
                         };
                         channel_sender.send(data).unwrap();
                     }
                     Err(_) => {
-                        panic!("Error receiveing data!");
+                        panic!("[elev_driver] Error receiveing data!");
                     }
 
                 }
