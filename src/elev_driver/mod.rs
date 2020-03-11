@@ -3,13 +3,14 @@ pub mod net_io;
 use std::io;
 
 use net_io::Communication;
+use net_io::RequestType;
 use std::thread;
 use std::sync::mpsc::channel;
 use std::sync::mpsc::{Receiver, Sender};
 
 pub struct ElevIo {
     pub io: Communication,
-    to_elevator: Sender<std::vec::Vec<u8>>,
+    to_elevator: Sender<(RequestType , std::vec::Vec<u8>)>,
     to_elevator_feedback: Sender<Sender<std::vec::Vec<u8>>>,
 }
 
@@ -65,7 +66,7 @@ const PORT: u16 = 15657;
 
 impl ElevIo {
     pub fn new() -> io::Result<Self> {
-        let (to_elev_sender, to_elev_reciver) = channel::<std::vec::Vec<u8>>();
+        let (to_elev_sender, to_elev_reciver) = channel::<(RequestType , std::vec::Vec<u8>)>();
         let (from_elev_sender, from_elev_reciver) = channel::<std::vec::Vec<u8>>();
         let (send_data, receive_data) = channel::<Sender<std::vec::Vec<u8>>>();
         let elev = ElevIo { io: Communication::new(String::from(IP_ADDRESS), PORT, to_elev_reciver, from_elev_sender)?, to_elevator: to_elev_sender, to_elevator_feedback: send_data};
@@ -104,15 +105,15 @@ impl ElevIo {
         match dir {
             MotorDir::Stop => {
                 let dir = vec![1, 0, 0, 0];
-                self.to_elevator.send(dir);
+                self.to_elevator.send((RequestType::Write , dir));
             },
             MotorDir::Up => {
                 let dir = vec![1, 1, 0, 0];
-                self.to_elevator.send(dir);
+                self.to_elevator.send((RequestType::Write , dir));
             },
             MotorDir::Down => {
                 let dir = vec![1, 255, 0, 0];
-                self.to_elevator.send(dir);
+                self.to_elevator.send((RequestType::Write , dir));
             },
         };
         Ok(())
@@ -154,7 +155,7 @@ impl ElevIo {
                 light_command[3] = 0;
             },
         };
-        self.to_elevator.send(light_command);
+        self.to_elevator.send((RequestType::Write , light_command));
         Ok(())
         
     }
@@ -165,7 +166,7 @@ impl ElevIo {
                 return Err(io::Error::new(io::ErrorKind::InvalidInput, "given floor is not supported"));
             }
             let floor_vec = vec![3, etg, 0, 0];
-            self.to_elevator.send(floor_vec);
+            self.to_elevator.send((RequestType::Write , floor_vec));
             Ok(())
         } else {
             Err(io::Error::new(io::ErrorKind::InvalidInput, "Cannot set light between floors"))
@@ -175,10 +176,10 @@ impl ElevIo {
     pub fn set_door_light(&self, mode: Light) -> io::Result<()> {
         match mode {
             Light::On => {
-                self.to_elevator.send(vec![4, 1, 0, 0]);
+                self.to_elevator.send((RequestType::Write , vec![4, 1, 0, 0]));
             },
             Light::Off => {
-                self.to_elevator.send(vec![4, 0, 0, 0]);
+                self.to_elevator.send((RequestType::Write , vec![4, 0, 0, 0]));
             },
         }
         Ok(())
@@ -187,10 +188,10 @@ impl ElevIo {
     pub fn set_stop_light(&self, mode: Light) -> io::Result<()> {
         match mode {
             Light::On => {
-                self.to_elevator.send(vec![5, 1, 0, 0]);
+                self.to_elevator.send((RequestType::Write, vec![5, 1, 0, 0]));
             },
             Light::Off => {
-                self.to_elevator.send(vec![5, 0, 0, 0]);
+                self.to_elevator.send((RequestType::Write, vec![5, 0, 0, 0]));
             },
         }
         Ok(())
@@ -215,7 +216,7 @@ impl ElevIo {
         };
         let (sender, receive) = channel::<std::vec::Vec<u8>>();
         self.to_elevator_feedback.send(sender).unwrap();
-        self.to_elevator.send(light_command).unwrap();
+        self.to_elevator.send((RequestType::Read , light_command)).unwrap();
         match receive.recv(){
             Ok(value) => {
                 if value[1] == 0 {
@@ -234,7 +235,7 @@ impl ElevIo {
         let (sender, receive) = channel::<std::vec::Vec<u8>>();
         let get_floor_vec = vec![7, 0, 0, 0];
         self.to_elevator_feedback.send(sender).unwrap();
-        self.to_elevator.send(get_floor_vec).unwrap();
+        self.to_elevator.send((RequestType::Read, get_floor_vec)).unwrap();
         match receive.recv(){
             Ok(value) => {
                 if value[1] == 0 {
@@ -253,7 +254,7 @@ impl ElevIo {
         let (sender, receive) = channel::<std::vec::Vec<u8>>();
         let get_floor_vec = vec![8, 0, 0, 0];
         self.to_elevator_feedback.send(sender).unwrap();
-        self.to_elevator.send(get_floor_vec).unwrap();
+        self.to_elevator.send((RequestType::Read, get_floor_vec)).unwrap();
         match receive.recv(){
             Ok(value) => {
                 if value[1] == 0 {
@@ -271,7 +272,7 @@ impl ElevIo {
         let (sender, receive) = channel::<std::vec::Vec<u8>>();
         let get_floor_vec = vec![9, 0, 0, 0];
         self.to_elevator_feedback.send(sender).unwrap();
-        self.to_elevator.send(get_floor_vec).unwrap();
+        self.to_elevator.send((RequestType::Read, get_floor_vec)).unwrap();
         match receive.recv(){
             Ok(value) => {
                 if value[1] == 0 {
