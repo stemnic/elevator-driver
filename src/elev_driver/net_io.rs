@@ -20,7 +20,7 @@ impl Communication {
             loop {
                 match send_message.recv() {
                     Ok(data) => {
-                        thread::sleep(time::Duration::from_millis(18));
+                        thread::sleep(time::Duration::from_millis(20));
                         //println!("[elev_driver] Sending: {:?}", data);
                         let mut buffer = [0; 4];
                         let _ = stream.write(&data.into_boxed_slice()); //We always expect a response by polling the elevator server
