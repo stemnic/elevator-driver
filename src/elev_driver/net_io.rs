@@ -21,8 +21,8 @@ impl Communication {
         let connect_ip: String = ip + ":" + &port.to_string();
         let copy_reciver = receive_message.clone();
         let network_lifeline = thread::spawn(move || {
-            let mut stream = TcpStream::connect(connect_ip).unwrap();
-            stream.set_read_timeout(Some(Duration::from_millis(5))).unwrap(); //Timeout since the elevator server does not have a ACK
+            let mut stream = TcpStream::connect(connect_ip).expect("Could not connect to Elevator server");
+            stream.set_read_timeout(Some(Duration::from_millis(5))).expect("Failed to set read timeout for tcp stream"); //Timeout since the elevator server does not have a ACK
             loop {
                 match send_message.recv() {
                     Ok(data) => {
