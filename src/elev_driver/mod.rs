@@ -60,15 +60,15 @@ impl Signal {
     }
 }
 
-const IP_ADDRESS: &str = "localhost";
-const PORT: u16 = 15657;
+pub const DEFAULT_IP_ADDRESS: &str = "localhost";
+pub const DEFAULT_PORT: u16 = 15657;
 
 impl ElevIo {
-    pub fn new() -> io::Result<Self> {
+    pub fn new(ip_address: &str, port: u16) -> io::Result<Self> {
         let (to_elev_sender, to_elev_reciver) = channel::<std::vec::Vec<u8>>();
         let (from_elev_sender, from_elev_reciver) = channel::<std::vec::Vec<u8>>();
         let (send_data, receive_data) = channel::<Sender<std::vec::Vec<u8>>>();
-        let elev = ElevIo { io: Communication::new(String::from(IP_ADDRESS), PORT, to_elev_reciver, from_elev_sender)?, to_elevator: to_elev_sender, to_elevator_feedback: send_data};
+        let elev = ElevIo { io: Communication::new(String::from(ip_address), port, to_elev_reciver, from_elev_sender)?, to_elevator: to_elev_sender, to_elevator_feedback: send_data};
         elev.set_all_light(Light::Off)?;
         elev.set_floor_light(Floor::At(0))?;
         // Thread spawning receive incomming polling data

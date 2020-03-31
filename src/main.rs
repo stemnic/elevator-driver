@@ -8,7 +8,7 @@ use elev_driver::net_io::*;
 use elev_driver::*;
 
 fn main() {
-    let driver = elev_driver::ElevIo::new().unwrap();
+    let driver = elev_driver::ElevIo::new(DEFAULT_IP_ADDRESS, DEFAULT_PORT).unwrap();
     //driver.set_motor_dir(elev_driver::MotorDir::Up);
     //driver.set_stop_light(elev_driver::Light::On);
     //let floor = driver.get_floor_signal().unwrap();
