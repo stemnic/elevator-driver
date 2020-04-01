@@ -14,7 +14,7 @@ pub struct ElevIo {
     to_elevator_feedback: Sender<Sender<std::vec::Vec<u8>>>,
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Floor {
     At(u8),
     Between,
@@ -23,27 +23,27 @@ pub const N_FLOORS: u8 = 4;
 const TOP: u8 = N_FLOORS - 1;
 const SEC_TOP: u8 = N_FLOORS - 2;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Button {
     CallUp(Floor),
     CallDown(Floor),
     Internal(Floor),
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum MotorDir {
     Up,
     Down,
     Stop,
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Light {
     On,
     Off,
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Signal {
     High,
     Low,

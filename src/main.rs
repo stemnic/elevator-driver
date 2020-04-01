@@ -9,18 +9,10 @@ use elev_driver::*;
 
 fn main() {
     let driver = elev_driver::ElevIo::new(DEFAULT_IP_ADDRESS, DEFAULT_PORT).unwrap();
-    //driver.set_motor_dir(elev_driver::MotorDir::Up);
-    //driver.set_stop_light(elev_driver::Light::On);
-    //let floor = driver.get_floor_signal().unwrap();
-    //println!("At floor: {:?}", floor);
-    //println!("Button sig: {:?}", driver.get_button_signal(elev_driver::Button::CallDown(Floor::At(3))).unwrap());
-    //println!("stop sig: {:?}", driver.get_stop_signal().unwrap());
-
-    //driver.set_motor_dir(MotorDir::Up).expect("Set MotorDir failed");
 
     const SEC_TOP: u8 = elev_driver::N_FLOORS - 1;
     loop {
-        
+        thread::sleep_ms(10);
         for floor in 0..elev_driver::N_FLOORS {
             match driver.get_button_signal(elev_driver::Button::Internal(elev_driver::Floor::At(floor))).expect("Button signal error") {
                 Signal::High => {
@@ -44,6 +36,7 @@ fn main() {
 
                             }
                         }
+                        
                     }
                 }
                 Signal::Low => {
