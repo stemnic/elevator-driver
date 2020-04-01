@@ -24,6 +24,7 @@ fn main() {
         for floor in 0..elev_driver::N_FLOORS {
             match driver.get_button_signal(elev_driver::Button::Internal(elev_driver::Floor::At(floor))).expect("Button signal error") {
                 Signal::High => {
+                    println!("[elev_driver] Going to {:?}", floor);
                     loop {
                         match driver.get_floor_signal()
                                     .expect("Get FloorSignal failed") {
@@ -73,4 +74,17 @@ fn main() {
     }
     net.join();
     */
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn exploration() {
+        assert_eq!(2 + 2, 4);
+    }
+
+    #[test]
+    fn another() {
+        panic!("Make this test fail");
+    }
 }

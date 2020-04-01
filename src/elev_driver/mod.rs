@@ -83,15 +83,15 @@ impl ElevIo {
                                 //println!("[elev_driver] Answer:  {:?}", value);
                                 value
                             },
-                            Err(_) => {
-                                println!("[elev_driver] Recv Error");
+                            Err(error) => {
+                                println!("[elev_driver] Recv Error {:?}", error);
                                 vec![0,0,0,0]
                             }
                         };
                         channel_sender.send(data).unwrap();
                     }
-                    Err(_) => {
-                        panic!("[elev_driver] Error receiveing data!");
+                    Err(error) => {
+                        panic!("[elev_driver] Error receiveing data! {:?}", error);
                     }
 
                 }

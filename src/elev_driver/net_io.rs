@@ -22,12 +22,12 @@ impl Communication {
         let copy_reciver = receive_message.clone();
         let network_lifeline = thread::spawn(move || {
             let mut stream = TcpStream::connect(connect_ip).expect("Could not connect to Elevator server");
-            stream.set_read_timeout(Some(Duration::from_millis(5))).expect("Failed to set read timeout for tcp stream"); //Timeout since the elevator server does not have a ACK
+            stream.set_read_timeout(Some(Duration::from_millis(10))).expect("Failed to set read timeout for tcp stream"); //Timeout since the elevator server does not have a ACK
             loop {
                 match send_message.recv() {
                     Ok(data) => {
                         let (req_type, msg) = data;
-                        println!("[elev_driver] Type: {:?} Sending: {:?}", req_type, msg);
+                        //println!("[elev_driver] Type: {:?} Sending: {:?}", req_type, msg);
                         match req_type {
                             RequestType::Write => {
                                 let _ = stream.write(&msg.into_boxed_slice());
@@ -46,16 +46,17 @@ impl Communication {
                                 };
                                 let mut t = Vec::new();
                                 for i in buffer.iter() { t.push(*i); }
-                                println!("[elev_driver] Recived: {:?}", t);
-                                if t != vec![0,0,0,0]{
-                                    let _ = copy_reciver.send(t);
-                                }
+                                //println!("[elev_driver] Recived: {:?}", t);
+                                let _ = copy_reciver.send(t);
                             }
                         }
                     }
         
-                    Err(_) => return, // This means, that the sender has disconnected
-                                      // and no further messages can ever be received
+                    Err(_) => {
+                        println!("[elev_driver] TCP connection closed");
+                        return
+                    } // This means, that the sender has disconnected
+                      // and no further messages can ever be received
                 }
             }
         });
