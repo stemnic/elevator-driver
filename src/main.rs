@@ -54,30 +54,40 @@ fn main() {
     }
 
     driver.io.lifeline.join();
-    /*
-    let (sending_tx, sending_rx) = channel::<std::vec::Vec<u8>>();
-    let (reciving_tx, reciving_rx) = channel::<std::vec::Vec<u8>>();
-    let net = thread::spawn(move || {
-        let mut network = Communication::new("localhost".to_string(), 15657, sending_rx, reciving_tx).unwrap();
-        network.start();
-    });
-    sending_tx.send(vec![6,0,0,1]).unwrap();
-    loop {
-        println!("Got something! {:?}", reciving_rx.recv().unwrap())
-    }
-    net.join();
-    */
 }
 
 #[cfg(test)]
 mod tests {
-    #[test]
-    fn exploration() {
-        assert_eq!(2 + 2, 4);
-    }
+    use super::*;
+    use std::net::*;
+    use std::io::*;
 
+    fn tcp_response( expectedData: std::vec::Vec<u8> ) {
+        thread::spawn(move || {
+            let listener = TcpListener::bind("localhost:15657").unwrap();
+            for stream in listener.incoming() {
+                let mut data = [0; 4];
+                let mut stream = stream.unwrap();
+                while match stream.read(&mut data) {
+                    Ok(size) => {
+                        stream.write(&expectedData.clone().into_boxed_slice()).unwrap();
+                        true
+                    },
+                    Err(_) => {
+                        println!("An error occurred, terminating connection with {}", stream.peer_addr().unwrap());
+                        stream.shutdown(Shutdown::Both).unwrap();
+                        false
+                    }
+                } {}
+            }
+        });
+    }
     #[test]
-    fn another() {
-        panic!("Make this test fail");
+    fn test_floor_signal() {
+        for floor in 0..N_FLOORS {
+            tcp_response(vec![7,1,floor,0]);
+            let driver = elev_driver::ElevIo::new(DEFAULT_IP_ADDRESS, DEFAULT_PORT).unwrap();
+            assert_eq!(elev_driver::Floor::At(0), driver.get_floor_signal().unwrap())
+        }
     }
 }
