@@ -14,6 +14,17 @@ pub struct ElevIo {
     to_elevator_feedback: Sender<Sender<std::vec::Vec<u8>>>,
 }
 
+struct SignalStorage {
+    floor_signal: Floor,
+    stop_signal: Signal,
+    obstr_signal: Signal,
+    button_singals: std::vec::Vec<std::vec::Vec<std::vec::Vec<Button>>>    
+}
+
+// Floor n
+// Button type
+// High Low
+
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Floor {
     At(u8),
