@@ -49,11 +49,6 @@ pub enum Signal {
     Low,
 }
 
-struct sender_type {
-    sender: Sender<std::vec::Vec<u8>>,
-    data: std::vec::Vec<u8>
-}
-
 impl Signal {
     pub fn new(value: usize) -> Self {
         if value == 0 { Signal::Low }
