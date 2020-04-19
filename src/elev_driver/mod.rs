@@ -72,8 +72,7 @@ impl ElevIo {
         let elev = ElevIo { io: Communication::new(String::from(ip_address), port, to_elev_reciver, from_elev_sender)?, to_elevator: to_elev_sender, to_elevator_feedback: send_data};
         elev.set_all_light(Light::Off)?;
         elev.set_floor_light(Floor::At(0))?;
-        // Thread spawning receive incomming polling data
-        thread::spawn(move || {
+        thread::spawn(move || { // Thread for reciving feedback channels read functions sends before sending a read request to the elevator.
             loop {
                 match receive_data.recv() {
 
@@ -157,7 +156,6 @@ impl ElevIo {
         };
         self.to_elevator.send((RequestType::Write , light_command));
         Ok(())
-        
     }
 
     pub fn set_floor_light(&self, floor: Floor) -> io::Result<()> {
@@ -231,7 +229,6 @@ impl ElevIo {
     }
     
     pub fn get_floor_signal(&self) -> io::Result<Floor> {
-        
         let (sender, receive) = channel::<std::vec::Vec<u8>>();
         let get_floor_vec = vec![7, 0, 0, 0];
         self.to_elevator_feedback.send(sender).unwrap();
@@ -247,7 +244,6 @@ impl ElevIo {
                 Ok(Floor::Between)
             }
         }
-        
     }
     
     pub fn get_stop_signal(&self) -> io::Result<Signal> {
